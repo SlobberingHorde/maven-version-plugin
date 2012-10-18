@@ -1,31 +1,5 @@
 package com.blackboxsoft.maven;
 
-/*
- * #%L
- * maven-version-plugin
- * %%
- * Copyright (C) 2012 BlackBox Software, Inc
- * %%
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- * #L%
- */
-
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,38 +49,51 @@ public class VersionMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		writeHeader();		writeTheVersionFiles(createFileContents());
+		writeHeader();
+		writeTheVersionFiles(createFileContents());
+		writeLog("Versioning complete");
 	}
 
 	/*
 	 * Writes the files to the target directory
 	 */
-	protected void writeTheVersionFiles(List<VersionFile> outputFiles) {
+	protected void writeTheVersionFiles(List<VersionFile> outputFiles) throws MojoExecutionException {
 		for(VersionFile outputFile : outputFiles) {
 			try {
-				IOUtils.write(outputFile.getContents(), new FileOutputStream(targetDirectory + "/" + VERSION_FILE_PREFIX + outputFile.getType()), "UTF-8");
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+				String fileName = generateVersionFilename(outputFile);
+				IOUtils.write(outputFile.getContents(), getOutputFileStream(fileName), "UTF-8");
+			} catch (Exception e) {
+				throw new MojoExecutionException("Could not write out ", e);
 			}
 		}
 	}
 
-	protected List<VersionFile> createFileContents() {
+	protected OutputStream getOutputFileStream(String filename) throws FileNotFoundException {
+		return new FileOutputStream(filename);
+	}
+	
+	protected String generateVersionFilename(VersionFile outputFile) {
+		return targetDirectory + "/" + VERSION_FILE_PREFIX + outputFile.getType();
+	}
+
+	protected List<VersionFile> createFileContents() throws MojoExecutionException {
 		List<VersionFile> outputFiles = new ArrayList<VersionFile>();
 		try {
 			for(String type : types) {
-				String fileContents = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(VERSION_FILE_PREFIX + type));
-				fileContents = fileContents.replace("@project@", project);
-				fileContents = fileContents.replace("@version@", version);
-				fileContents = fileContents.replace("@branch@", branch);
-				outputFiles.add(new VersionFile(type, fileContents));
+				outputFiles.add(new VersionFile(type, generateFileContents(type)));
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			throw new MojoExecutionException("Unknown filetype specified",  e);
 		}
 		return outputFiles;
+	}
+
+	protected String generateFileContents(String type) throws IOException {
+		String fileContents = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(VERSION_FILE_PREFIX + type));
+		fileContents = fileContents.replace("@project@", project);
+		fileContents = fileContents.replace("@version@", version);
+		fileContents = fileContents.replace("@branch@", branch);
+		return fileContents;
 	}
 
 	private void writeHeader() {
@@ -136,19 +123,23 @@ public class VersionMojo extends AbstractMojo {
 		getLog().info(message);
 	}
 
-	public String getProject() {
-		return project;
+	public void setProject(String project) {
+		this.project = project;
 	}
 
-	public String getVersion() {
-		return version;
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
-	public String getBranch() {
-		return branch;
+	public void setBranch(String branch) {
+		this.branch = branch;
 	}
 
 	public List<String> getTypes() {
-		return types;
+		return this.types;
+	}
+
+	public void setTypes(List<String> types) {
+		this.types = types;
 	}
 }
