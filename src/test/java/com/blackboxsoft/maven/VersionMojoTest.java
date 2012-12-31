@@ -1,18 +1,15 @@
 package com.blackboxsoft.maven;
 
-import java.io.FileNotFoundException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.spy;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Before;
 import org.junit.Test;
-import static org.mockito.Mockito.*;
-import com.blackboxsoft.maven.VersionMojo;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.fail;
 
 public class VersionMojoTest {
 
@@ -52,6 +49,20 @@ public class VersionMojoTest {
 		mojo.getTypes().add("htm");
 		List<VersionMojo.VersionFile> files = mojo.createFileContents();
 		assertThat("Incorrect number of verion files created", files.size(), equalTo(2));
+	}
+	
+	@Test
+	public void shouldAllowOverrideOfDefaultTargetDirectory(){
+		VersionMojo modMojo = new VersionMojo();
+		modMojo.setBranch("Head");
+		modMojo.setProject("Test Project");
+		modMojo.setVersion("1.0");
+		modMojo.setTargetDirectory("some/other/path");
+		
+		VersionMojo.VersionFile outputFile = new VersionMojo.VersionFile("txt", "These are the contents");
+		
+		String actual = modMojo.generateVersionFilename(outputFile);	
+		assertThat("Does not generate the proper file name", actual, equalTo("some/other/path/version.txt"));
 	}
 	
 //	@Test(expected=MojoExecutionException.class)
