@@ -21,7 +21,11 @@ public class VersionMojo extends AbstractMojo {
 
 	private static final String VERSION_FILE_PREFIX = "version.";
 
-	private static final String targetDirectory = "src/main/webapp";
+	/**
+	 * The directory into which the version file should be placed.
+	 * @parameter expression="${version.targetDirectory}" default-value="src/main/webapp" 
+	 */
+	private String targetDirectory = "src/main/webapp";
 	
     /**
      * The project name to insert into the version files.
@@ -133,6 +137,10 @@ public class VersionMojo extends AbstractMojo {
 
 	public void setBranch(String branch) {
 		this.branch = branch;
+	}
+
+	public void setTargetDirectory(String targetDirectory) {
+		this.targetDirectory = targetDirectory;
 	}
 
 	public List<String> getTypes() {
