@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.spy;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
@@ -21,9 +20,10 @@ public class VersionMojoTest {
 		mojo.setBranch("Head");
 		mojo.setProject("Test Project");
 		mojo.setVersion("1.0");
-		List<String> types = new ArrayList<String>();
-		types.add("txt");
-		mojo.setTypes(types);
+		mojo.setBuildTimestamp("2012-10-19 11:57:00");
+		mojo.setBuildTag("Test Tag");
+		String[] types = new String[]{"txt"};
+		mojo.setExtensions(types);
 	}
 	
 	@Test
@@ -41,14 +41,14 @@ public class VersionMojoTest {
 	@Test 
 	public void shouldGenerateTheProperFileContents() throws Exception {
 		String actual = mojo.generateFileContents("txt");
-		assertThat("Does not generate the proper file contents", actual, equalTo("Test Project Version 1.0 Branch Head"));
+		assertThat("Does not generate the proper file contents", actual, equalTo("Test Project Version 1.0 Build Timestamp 2012-10-19 11:57:00 Branch Head Build Tag Name Test Tag"));
 	}
 	
 	@Test
-	public void shouldCreateAListOfTwoVersionFiles() throws Exception {
-		mojo.getTypes().add("htm");
+	public void shouldCreateAListOfThreeVersionFiles() throws Exception {
+		mojo.setExtensions(new String[] {"txt", "htm", "properties"});
 		List<VersionMojo.VersionFile> files = mojo.createFileContents();
-		assertThat("Incorrect number of verion files created", files.size(), equalTo(2));
+		assertThat("Incorrect number of verion files created", files.size(), equalTo(3));
 	}
 	
 	@Test

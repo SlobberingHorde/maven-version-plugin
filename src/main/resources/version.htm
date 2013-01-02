@@ -4,8 +4,28 @@
 <TITLE>@project@ Version</TITLE>
 </HEAD>
 <BODY>
-	<h1>@project@</h1>
-	<P>Version: @version@</P>
-	<P>Branch: @branch@</P>
+	<TABLE border="1" width="50%" align="center" cellspacing="2">
+		<TBODY>
+			<TR>
+				<TH colspan="2">@project@</TH>
+			</TR>
+			<TR>
+				<TH align="right">Version</TH>
+				<TD>@version@</TD>
+			</TR>	
+			<TR>
+				<TH align="right">Build Timestamp</TH>
+				<TD>@buildTimestamp@</TD>
+			</TR>	
+			<TR>
+				<TH align="right">Branch</TH>
+				<TD>@branch@</TD>
+			</TR>	
+			<TR>
+				<TH align="right">Build Tag Name</TH>
+				<TD>@buildTag@</TD>
+			</TR>	
+		</TBODY>
+	</TABLE>
 </BODY>
 </HTML>
