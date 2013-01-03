@@ -1,1 +1,1 @@
-@project@ Version @version@ Branch @branch@
+@project@ Version @version@ Build Timestamp @buildTimestamp@ Branch @branch@ Build Tag Name @buildTag@

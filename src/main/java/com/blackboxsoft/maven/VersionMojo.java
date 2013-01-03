@@ -40,6 +40,18 @@ public class VersionMojo extends AbstractMojo {
 	private String version;
 
 	/**
+     * The build timestamp value to insert into the version files.
+     * @parameter expression="${env.BUILD.STARTED}" default-value="unknown"
+     */
+	private String buildTimestamp;
+
+	/**
+     * The build tag name value to insert into the version files.
+     * @parameter expression="${env.BUILD_TAG}" default-value="unknown"
+     */
+	private String buildTag;
+	
+	/**
      * The branch to insert into the version files.
      * @parameter expression="${version.branch}" default-value="HEAD"
      */
@@ -47,12 +59,15 @@ public class VersionMojo extends AbstractMojo {
 
 	/**
 	 * The types of files we will create.
-     * @parameter expression="${version.types}" default-value="txt"
+     * @parameter alias="extensions" default-value="txt"
 	 */
-	private List<String> types;
+	private String providedTypes;
+
+	private String[] extensions;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+		setExtensions(providedTypes.split(" "));
 		writeHeader();
 		writeTheVersionFiles(createFileContents());
 		writeLog("Versioning complete");
@@ -83,8 +98,8 @@ public class VersionMojo extends AbstractMojo {
 	protected List<VersionFile> createFileContents() throws MojoExecutionException {
 		List<VersionFile> outputFiles = new ArrayList<VersionFile>();
 		try {
-			for(String type : types) {
-				outputFiles.add(new VersionFile(type, generateFileContents(type)));
+			for(String extension : extensions) {
+				outputFiles.add(new VersionFile(extension, generateFileContents(extension)));
 			}
 		} catch (Exception e) {
 			throw new MojoExecutionException("Unknown filetype specified",  e);
@@ -97,13 +112,18 @@ public class VersionMojo extends AbstractMojo {
 		fileContents = fileContents.replace("@project@", project);
 		fileContents = fileContents.replace("@version@", version);
 		fileContents = fileContents.replace("@branch@", branch);
+		fileContents = fileContents.replace("@buildTimestamp@", buildTimestamp);
+		fileContents = fileContents.replace("@buildTag@", buildTag);
 		return fileContents;
 	}
 
 	private void writeHeader() {
 		writeLog("Versioning");
-		writeLog(String.format("Using values: Project[%s] Version[%s] Branch[%s]", project, version, branch));
-		writeLog(String.format("For types: %s", types));
+		writeLog(String.format("Using values: Project[%s] Version[%s] Build Timestamp[%s] Branch[%s] Build Tag Name [%s]", project, version, buildTimestamp, branch, buildTag));
+		writeLog("For extensions:");
+		for(String extension : extensions) {
+			writeLog(String.format("      %s", extension));
+		}
 	}
 	
 	protected static class VersionFile {
@@ -138,16 +158,41 @@ public class VersionMojo extends AbstractMojo {
 	public void setBranch(String branch) {
 		this.branch = branch;
 	}
+	
+	public String[] getExtensions() {
+		return this.extensions;
+	}
+
+	public void setExtensions(String[] extensions) {
+		this.extensions = extensions;
+	}
+
+	public String getProvidedTypes() {
+		return providedTypes;
+	}
+
+	public void setProvidedTypes(String providedTypes) {
+		this.providedTypes = providedTypes;
+	}
+
+	public String getBuildTimestamp() {
+		return buildTimestamp;
+	}
+
+	public void setBuildTimestamp(String buildTimestamp) {
+		this.buildTimestamp = buildTimestamp;
+	}
+
+	public String getBuildTag() {
+		return buildTag;
+	}
+
+	public void setBuildTag(String buildTag) {
+		this.buildTag = buildTag;
+	}
 
 	public void setTargetDirectory(String targetDirectory) {
 		this.targetDirectory = targetDirectory;
 	}
 
-	public List<String> getTypes() {
-		return this.types;
-	}
-
-	public void setTypes(List<String> types) {
-		this.types = types;
-	}
 }
